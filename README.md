@@ -1,24 +1,41 @@
 # I2C Master-Slave Protocol Implementation
 
-This repository contains a complete, synthesizable I2C master and slave implementation written in Verilog, along with a top-level wrapper and a self-checking testbench. 
+This repository contains a complete, synthesizable I2C master and slave implementation written in Verilog, along with a top-level wrapper and a comprehensive self-checking testbench.
 
 ## Features
-* **Parameterized Clocks:** Configurable system clock and I2C bus frequencies.
-* **Addressing Modes:** Supports both standard 7-bit and extended 10-bit addressing.
-* **Advanced I2C Features:** Implements clock stretching and repeated-START conditions.
-* **Burst Operations:** Supports multi-byte burst reads and writes.
-* **Verification:** Includes a comprehensive, self-checking testbench validating protocol edge cases (NACK recovery, clock stretch handshaking, etc.).
+- **Parameterized Clocks:** Configurable system clock and I2C bus frequencies via module parameters.
+- **Addressing Modes:** Fully supports both standard 7-bit and extended 10-bit addressing.
+- **Advanced Protocol Handling:** Natively implements intentional clock stretching and repeated-START conditions for seamless multi-message transfers.
+- **Burst Operations:** Supports multi-byte burst reads and writes (e.g., configuring multiple consecutive registers).
+- **Self-Checking Verification:** Includes a testbench that validates protocol edge cases, including NACK recovery and clock stretch handshakes, outputting a clear pass/fail summary.
 
 ## File Structure
-* `i2c_system_top.v`: Top-level wrapper instantiating both the master and slave modules with internal pull-ups for SDA and SCL.
-* `i2c_master.v`: The I2C master controller state machine.
-* `i2c_slave.v`: The I2C slave device containing a 16-byte internal register memory.
-* `tb_i2c_protocol.v`: A self-checking testbench that simulates various I2C transactions and generates a `.vcd` waveform file.
+- `i2c_system_top.v`: The top-level wrapper that instantiates both the master and slave modules. It also implements internal pull-up logic for the SDA and SCL lines.
+- `i2c_master.v`: The I2C master controller state machine handling transmission, reception, and bus clock generation.
+- `i2c_slave.v`: The I2C slave device containing a 16-byte internal register memory to respond to master read/write requests.
+- `tb_i2c_protocol.v`: The self-checking simulation testbench.
 
-## Simulation
-To simulate this project using Icarus Verilog, run the following commands:
-```bash
-iverilog -o i2c_sim tb_i2c_protocol.v i2c_system_top.v i2c_master.v i2c_slave.v
-vvp i2c_sim
-```
-This will output the test results to the console and generate an `i2c_protocol_sim.vcd` file that can be viewed in GTKWave.
+## Hardware & Toolchain
+- **Language:** Verilog HDL
+- **Simulation & Synthesis:** Xilinx Vivado
+- **Target Hardware:** Designed for compatibility with FPGAs such as the Nexys 4 DDR (Artix-7), but easily portable to other architectures. 
+
+## Usage in Xilinx Vivado
+
+### 1. Project Setup
+1. Open Xilinx Vivado and create a new **RTL Project**.
+2. When prompted for parts/boards, select your target FPGA (e.g., Nexys 4 DDR).
+3. In the **Add Sources** menu, click **Add Files** and import:
+   - `i2c_system_top.v`
+   - `i2c_master.v`
+   - `i2c_slave.v`
+4. Vivado will automatically set `i2c_system_top.v` as the top module.
+
+### 2. Simulation
+1. In the **Sources** pane, add `tb_i2c_protocol.v` under **Simulation Sources**.
+2. Click **Run Simulation** -> **Run Behavioral Simulation** in the Flow Navigator.
+3. Check the **Tcl Console** for the automated testbench output (Pass/Fail counts). You can also view the I2C transactions directly in the waveform viewer.
+
+### 3. Synthesis & Implementation
+1. Click **Run Synthesis** to compile the RTL into hardware primitives.
+2. To run this on physical hardware, you will need to create and add an **XDC Constraints File** mapping the `clk`, `sda`, and `scl` ports to your specific FPGA pins.
